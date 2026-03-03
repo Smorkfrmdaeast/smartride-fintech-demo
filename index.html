@@ -2,21 +2,28 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>SmartRide NG</title>
+<title>SmartRide NG – Fintech Demo</title>
+
 <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<meta name="description" content="SmartRide NG is a mobile-first fintech transportation booking platform built with React. Users can book Keke, Okada, Cabs, and Buses, simulate wallet payments in Naira (₦), track drivers in real-time, and view booking history. Designed as an investor-ready MVP showcasing modern UI, fintech flow, and scalable architecture.">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 body{
   margin:0;
   font-family:Arial, sans-serif;
-  background:#f4f6f9;
   transition:0.3s;
 }
 .dark{
   background:#0f172a;
   color:white;
+}
+.light{
+  background:#f4f6f9;
+  color:#111;
 }
 .container{
   max-width:420px;
@@ -37,6 +44,8 @@ button{
 }
 .primary{
   background:#00e0ff;
+  color:#111;
+  font-weight:bold;
 }
 .card{
   background:white;
@@ -57,8 +66,9 @@ button{
 }
 .card:hover{
   transform:scale(1.02);
+  box-shadow:0 0 20px rgba(0,224,255,0.4);
 }
-.map{
+.map-ui{
   height:150px;
   background:linear-gradient(45deg,#00e0ff,#007cf0);
   border-radius:12px;
@@ -100,96 +110,127 @@ button{
 <div id="root"></div>
 
 <script type="text/babel">
+const { useState, useEffect } = React;
+
+const vehicles = [
+  { name: "Keke", price: 150, image: "images/keke.jpg" },
+  { name: "Okada", price: 100, image: "images/bike.jpg" },
+  { name: "Cab", price: 300, image: "images/cab.jpg" },
+  { name: "Bus", price: 200, image: "images/bus.jpg" }
+];
 
 function App(){
-  const [page,setPage]=React.useState("home");
-  const [selected,setSelected]=React.useState(null);
-  const [wallet,setWallet]=React.useState(10000);
-  const [history,setHistory]=React.useState([]);
-  const [dark,setDark]=React.useState(false);
+  const [theme, setTheme] = useState("dark");
+  const [page, setPage] = useState("home");
+  const [selected, setSelected] = useState(null);
+  const [wallet, setWallet] = useState(10000);
+  const [history, setHistory] = useState([]);
+  const [progress, setProgress] = useState(0);
+  const [showAdmin, setShowAdmin] = useState(false);
 
-  const vehicles=[
-    {name:"Keke",price:150,image:"assets/images/keke.jpg"},
-    {name:"Okada",price:100,image:"assets/images/okada.jpg"},
-    {name:"Cab",price:300,image:"assets/images/cab.jpg"},
-    {name:"Bus",price:200,image:"assets/images/bus.jpg"}
-  ];
+  useEffect(()=>{
+    document.body.className = theme;
+  }, [theme]);
 
-  function bookRide(vehicle){
-    const fare=vehicle.price*5;
-    if(wallet<fare){
+  const bookRide = (vehicle)=>{
+    setSelected(vehicle);
+    setPage("booking");
+  };
+
+  const calculateFare = (distance)=>{
+    const fare = selected.price * Number(distance);
+    if(wallet < fare){
       alert("Insufficient Wallet Balance");
       return;
     }
-    setWallet(wallet-fare);
-    setHistory([...history,{vehicle:vehicle.name,fare}]);
-    setSelected(vehicle);
+    setWallet(wallet - fare);
+    setHistory([...history, { vehicle: selected.name, fare }]);
     setPage("tracking");
-  }
+    setProgress(0);
+
+    let p=0;
+    const interval = setInterval(()=>{
+      p+=20;
+      setProgress(p);
+      if(p>=100) clearInterval(interval);
+    },1000);
+  };
 
   return(
-    <div className={dark?"dark":""}>
+    <div className={theme}>
       <div className="container">
 
         <div className="header">
           <h2>SmartRide NG</h2>
-          <button onClick={()=>setDark(!dark)}>🌙</button>
+          <div>
+            <span className="wallet">Wallet: ₦{wallet}</span>
+            <button onClick={()=>setTheme(theme==="dark"?"light":"dark")}>
+              {theme==="dark"?"☀ Light":"🌙 Dark"}
+            </button>
+            <button className="admin" onClick={()=>setShowAdmin(!showAdmin)}>
+              Admin
+            </button>
+          </div>
         </div>
 
-        <div className="wallet">Wallet: ₦{wallet}</div>
+        {showAdmin && (
+          <div className="admin">
+            <h4>Admin Dashboard</h4>
+            <p>Total Rides: {history.length}</p>
+            <p>Total Revenue: ₦{history.reduce((a,b)=>a+b.fare,0)}</p>
+            <p>Active Drivers: 12</p>
+          </div>
+        )}
 
         {page==="home" && (
           <>
-          {vehicles.map(v=>(
-            <div className="card" key={v.name}>
-              <img src={v.image}/>
-              <h3>{v.name}</h3>
-              <p>₦{v.price}/km</p>
-              <button className="primary" onClick={()=>bookRide(v)}>Book Ride</button>
-            </div>
-          ))}
+            <h3>Select Ride</h3>
+            {vehicles.map((v,i)=>(
+              <div key={i} className="card">
+                <img src={v.image}/>
+                <h4>{v.name}</h4>
+                <p>₦{v.price}/km</p>
+                <button className="primary" onClick={()=>bookRide(v)}>Book Ride</button>
+              </div>
+            ))}
+
+            {history.length>0 && (
+              <div className="card history">
+                <h4>Booking History</h4>
+                {history.map((h,i)=>(
+                  <div key={i}>{h.vehicle} - ₦{h.fare}</div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+
+        {page==="booking" && (
+          <>
+            <h3>{selected.name}</h3>
+            <input type="number" placeholder="Enter distance (km)" id="distance"/>
+            <button className="primary" onClick={()=>{
+              const d = document.getElementById("distance").value;
+              calculateFare(d);
+            }}>Confirm & Pay</button>
           </>
         )}
 
         {page==="tracking" && (
           <>
             <h3>Driver On The Way 🚗</h3>
-
-            <div className="map">
+            <div className="map-ui">
               <div className="driver-dot"></div>
             </div>
-
             <div className="card">
-              <img src="assets/images/driver.jpg"/>
+              <img src="images/driver.jpg"/>
               <h4>Driver: Tunde A.</h4>
               <p>Vehicle: {selected.name}</p>
               <p>Rating: ⭐ 4.8</p>
             </div>
-
-            <button className="primary" onClick={()=>setPage("success")}>Arrived</button>
+            {progress>=100 && <button className="primary" onClick={()=>setPage("home")}>Ride Completed ✅ Back Home</button>}
           </>
         )}
-
-        {page==="success" && (
-          <>
-            <h3>Ride Completed ✅</h3>
-            <button className="primary" onClick={()=>setPage("home")}>Back Home</button>
-          </>
-        )}
-
-        <div className="card history">
-          <h4>Booking History</h4>
-          {history.map((h,i)=>(
-            <div key={i}>{h.vehicle} - ₦{h.fare}</div>
-          ))}
-        </div>
-
-        <div className="admin">
-          <h4>Admin Dashboard (Simulation)</h4>
-          <p>Total Rides: {history.length}</p>
-          <p>Total Revenue: ₦{history.reduce((a,b)=>a+b.fare,0)}</p>
-          <p>Active Drivers: 12</p>
-        </div>
 
       </div>
     </div>
@@ -198,6 +239,5 @@ function App(){
 
 ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
 </script>
-
 </body>
-  </html>
+</html>
