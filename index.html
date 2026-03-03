@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>SmartRide NG</title>
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:#f4f6f9;
+  transition:0.3s;
+}
+.dark{
+  background:#0f172a;
+  color:white;
+}
+.container{
+  max-width:420px;
+  margin:auto;
+  padding:15px;
+}
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+button{
+  padding:10px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  margin-top:5px;
+}
+.primary{
+  background:#00e0ff;
+}
+.card{
+  background:white;
+  padding:10px;
+  margin-top:10px;
+  border-radius:12px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.1);
+  transition:0.3s;
+}
+.dark .card{
+  background:#1e293b;
+}
+.card img{
+  width:100%;
+  height:130px;
+  object-fit:cover;
+  border-radius:10px;
+}
+.card:hover{
+  transform:scale(1.02);
+}
+.map{
+  height:150px;
+  background:linear-gradient(45deg,#00e0ff,#007cf0);
+  border-radius:12px;
+  margin-top:10px;
+  position:relative;
+}
+.driver-dot{
+  width:15px;
+  height:15px;
+  background:red;
+  border-radius:50%;
+  position:absolute;
+  top:60px;
+  left:20px;
+  animation:move 4s infinite linear;
+}
+@keyframes move{
+  from{left:20px;}
+  to{left:300px;}
+}
+.wallet{
+  font-size:18px;
+  font-weight:bold;
+}
+.history{
+  font-size:14px;
+}
+.admin{
+  background:#111827;
+  color:white;
+  padding:10px;
+  border-radius:12px;
+  margin-top:15px;
+}
+</style>
+</head>
+
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+
+function App(){
+  const [page,setPage]=React.useState("home");
+  const [selected,setSelected]=React.useState(null);
+  const [wallet,setWallet]=React.useState(10000);
+  const [history,setHistory]=React.useState([]);
+  const [dark,setDark]=React.useState(false);
+
+  const vehicles=[
+    {name:"Keke",price:150,image:"assets/images/keke.jpg"},
+    {name:"Okada",price:100,image:"assets/images/okada.jpg"},
+    {name:"Cab",price:300,image:"assets/images/cab.jpg"},
+    {name:"Bus",price:200,image:"assets/images/bus.jpg"}
+  ];
+
+  function bookRide(vehicle){
+    const fare=vehicle.price*5;
+    if(wallet<fare){
+      alert("Insufficient Wallet Balance");
+      return;
+    }
+    setWallet(wallet-fare);
+    setHistory([...history,{vehicle:vehicle.name,fare}]);
+    setSelected(vehicle);
+    setPage("tracking");
+  }
+
+  return(
+    <div className={dark?"dark":""}>
+      <div className="container">
+
+        <div className="header">
+          <h2>SmartRide NG</h2>
+          <button onClick={()=>setDark(!dark)}>🌙</button>
+        </div>
+
+        <div className="wallet">Wallet: ₦{wallet}</div>
+
+        {page==="home" && (
+          <>
+          {vehicles.map(v=>(
+            <div className="card" key={v.name}>
+              <img src={v.image}/>
+              <h3>{v.name}</h3>
+              <p>₦{v.price}/km</p>
+              <button className="primary" onClick={()=>bookRide(v)}>Book Ride</button>
+            </div>
+          ))}
+          </>
+        )}
+
+        {page==="tracking" && (
+          <>
+            <h3>Driver On The Way 🚗</h3>
+
+            <div className="map">
+              <div className="driver-dot"></div>
+            </div>
+
+            <div className="card">
+              <img src="assets/images/driver.jpg"/>
+              <h4>Driver: Tunde A.</h4>
+              <p>Vehicle: {selected.name}</p>
+              <p>Rating: ⭐ 4.8</p>
+            </div>
+
+            <button className="primary" onClick={()=>setPage("success")}>Arrived</button>
+          </>
+        )}
+
+        {page==="success" && (
+          <>
+            <h3>Ride Completed ✅</h3>
+            <button className="primary" onClick={()=>setPage("home")}>Back Home</button>
+          </>
+        )}
+
+        <div className="card history">
+          <h4>Booking History</h4>
+          {history.map((h,i)=>(
+            <div key={i}>{h.vehicle} - ₦{h.fare}</div>
+          ))}
+        </div>
+
+        <div className="admin">
+          <h4>Admin Dashboard (Simulation)</h4>
+          <p>Total Rides: {history.length}</p>
+          <p>Total Revenue: ₦{history.reduce((a,b)=>a+b.fare,0)}</p>
+          <p>Active Drivers: 12</p>
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+
+</body>
+  </html>
