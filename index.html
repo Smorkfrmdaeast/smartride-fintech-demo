@@ -2,76 +2,39 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>SmartRide NG – Professional Fintech Demo</title>
+<title>SmartRide NG – Investor-Ready Demo</title>
 
 <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-<meta name="description" content="SmartRide NG is a mobile-first fintech ride-booking demo built with React. Book Keke, Okada, Cab, Bus, pay via wallet simulation, cancel or change rides, track drivers, and view booking history. Investor-ready demo with professional UI and scalable architecture.">
+<meta name="description" content="SmartRide NG is a mobile-first fintech ride-booking demo. Book Keke, Okada, Cab, Bus, pay via wallet simulation, cancel or change rides, track drivers, view booking history, and see vehicle availability. Professional investor-ready UI built with React.">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-/* GENERAL */
-body{
-  margin:0;
-  font-family: 'Segoe UI', Arial, sans-serif;
-  transition:0.3s;
-}
-.dark{ background:#121212; color:white; }
-.light{ background:#F8F9FA; color:#111; }
-
-.container{ max-width:420px; margin:auto; padding:15px; }
-
-/* HEADER */
-.header{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; }
-button{ padding:8px 12px; border:none; border-radius:8px; cursor:pointer; margin:5px 2px; font-weight:600; }
-
-/* BUTTONS */
-.primary{ background:#0D6EFD; color:white; }
-.success{ background:#198754; color:white; }
-.cancel{ background:#DC3545; color:white; }
-.admin{ background:#6C757D; color:white; }
-
-/* CARDS */
-.card{
-  background:white;
-  padding:12px;
-  margin-top:10px;
-  border-radius:12px;
-  box-shadow:0 4px 12px rgba(0,0,0,0.08);
-  transition:0.3s;
-}
-.dark .card{ background:#1E1E1E; box-shadow:0 4px 12px rgba(0,0,0,0.5); }
-.card img{ width:100%; height:130px; object-fit:cover; border-radius:10px; }
-.card:hover{ transform:scale(1.02); box-shadow:0 0 18px rgba(13,110,253,0.4); }
-
-/* MAP UI */
-.map-ui{
-  height:150px;
-  background:#0D6EFD;
-  border-radius:12px;
-  margin-top:10px;
-  position:relative;
-}
-.driver-dot{
-  width:15px; height:15px;
-  background:#DC3545;
-  border-radius:50%;
-  position:absolute;
-  top:60px;
-  left:20px;
-  animation:move 4s infinite linear;
-}
-@keyframes move{ from{left:20px;} to{left:300px;} }
-
-/* WALLET & HISTORY */
-.wallet{ font-size:18px; font-weight:bold; }
-.history{ font-size:14px; margin-top:10px; }
-
-/* INPUTS */
-input[type=number]{ padding:10px; margin-top:10px; border-radius:8px; border:1px solid #CED4DA; width:80%; max-width:300px; }
-
+body{margin:0;font-family:'Segoe UI',Arial,sans-serif;transition:0.3s;}
+.dark{background:#121212;color:white;}
+.light{background:#F8F9FA;color:#111;}
+.container{max-width:440px;margin:auto;padding:15px;}
+.header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;}
+button{padding:8px 12px;border:none;border-radius:8px;cursor:pointer;margin:5px 2px;font-weight:600;}
+.primary{background:#0D6EFD;color:white;}
+.success{background:#198754;color:white;}
+.cancel{background:#DC3545;color:white;}
+.admin{background:#6C757D;color:white;}
+.card{background:white;padding:12px;margin-top:10px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.08);transition:0.3s;}
+.dark .card{background:#1E1E1E;box-shadow:0 4px 12px rgba(0,0,0,0.5);}
+.card img{width:100%;height:130px;object-fit:cover;border-radius:10px;}
+.card:hover{transform:scale(1.02);box-shadow:0 0 18px rgba(13,110,253,0.4);}
+.map-ui{height:150px;background:#0D6EFD;border-radius:12px;margin-top:10px;position:relative;}
+.driver-dot{width:15px;height:15px;background:#DC3545;border-radius:50%;position:absolute;top:60px;left:20px;animation:move 4s infinite linear;}
+@keyframes move{from{left:20px;}to{left:300px;}}
+.wallet{font-size:18px;font-weight:bold;}
+.history{font-size:14px;margin-top:10px;}
+input[type=number]{padding:10px;margin-top:10px;border-radius:8px;border:1px solid #CED4DA;width:80%;max-width:300px;}
+.table{width:100%;border-collapse:collapse;margin-top:10px;}
+.table th,.table td{padding:6px 10px;text-align:left;border-bottom:1px solid #CED4DA;}
+.dark .table th,.dark .table td{border-bottom:1px solid #444;}
 </style>
 </head>
 
@@ -82,10 +45,17 @@ input[type=number]{ padding:10px; margin-top:10px; border-radius:8px; border:1px
 const { useState, useEffect } = React;
 
 const vehicles = [
-  { name: "Keke", price: 150, image: "images/keke.jpg" },
-  { name: "Okada", price: 100, image: "images/bike.jpg" },
-  { name: "Cab", price: 300, image: "images/cab.jpg" },
-  { name: "Bus", price: 200, image: "images/bus.jpg" }
+  { name: "Keke", price: 150, image: "images/keke.jpg", available: 5 },
+  { name: "Okada", price: 100, image: "images/bike.jpg", available: 5 },
+  { name: "Cab", price: 300, image: "images/cab.jpg", available: 5 },
+  { name: "Bus", price: 200, image: "images/bus.jpg", available: 5 }
+];
+
+const drivers = [
+  { name: "Tunde A.", vehicle: "Keke", rating: 4.8, available: true },
+  { name: "Chuka B.", vehicle: "Okada", rating: 4.6, available: true },
+  { name: "Aisha C.", vehicle: "Cab", rating: 4.9, available: true },
+  { name: "Emeka D.", vehicle: "Bus", rating: 4.7, available: true }
 ];
 
 function App(){
@@ -94,41 +64,60 @@ function App(){
   const [selected, setSelected] = useState(null);
   const [wallet, setWallet] = useState(10000);
   const [history, setHistory] = useState([]);
+  const [cancelled, setCancelled] = useState([]);
   const [progress, setProgress] = useState(0);
   const [showAdmin, setShowAdmin] = useState(false);
 
-  useEffect(()=>{
-    document.body.className = theme;
-  }, [theme]);
+  useEffect(()=>{document.body.className = theme;}, [theme]);
 
   const startBooking = (vehicle)=>{
     setSelected(vehicle);
     setPage("booking");
   };
 
-  const cancelBooking = ()=>{
+  const cancelBooking = (duringTracking=false)=>{
+    if(selected){
+      if(duringTracking){
+        // Refund wallet if tracking
+        const distanceVal = document.getElementById("distance").value;
+        const fare = distanceVal ? selected.price * Number(distanceVal) : 0;
+        setWallet(wallet + fare);
+      }
+      setCancelled([...cancelled,{vehicle:selected.name,time:new Date().toLocaleString()}]);
+      vehicles.forEach(v=>{if(v.name===selected.name)v.available++;});
+    }
     setSelected(null);
     setPage("home");
+    setProgress(0);
   };
 
   const calculateFare = (distance)=>{
-    const fare = selected.price * Number(distance);
-    if(wallet < fare){
-      alert("Insufficient Wallet Balance");
+    if(!distance || Number(distance)<=0){
+      alert("Please enter a valid distance before confirming payment.");
       return;
     }
-    setWallet(wallet - fare);
-    setHistory([...history, { vehicle: selected.name, fare }]);
+
+    const fare = selected.price * Number(distance);
+    if(wallet<fare){ 
+      alert("Insufficient Wallet Balance"); 
+      return; 
+    }
+
+    setWallet(wallet-fare);
+    setHistory([...history,{vehicle:selected.name,fare,time:new Date().toLocaleString()}]);
+    selected.available--;
     setPage("tracking");
     setProgress(0);
 
     let p=0;
-    const interval = setInterval(()=>{
+    const interval=setInterval(()=>{
       p+=20;
       setProgress(p);
       if(p>=100) clearInterval(interval);
     },1000);
   };
+
+  const availableDrivers = drivers.filter(d=>d.available).length;
 
   return(
     <div className={theme}>
@@ -152,9 +141,45 @@ function App(){
         {showAdmin && (
           <div className="card admin">
             <h4>Admin Dashboard</h4>
-            <p>Total Rides: {history.length}</p>
-            <p>Total Revenue: ₦{history.reduce((a,b)=>a+b.fare,0)}</p>
-            <p>Active Drivers: 12</p>
+            <p>Total Available Drivers: {availableDrivers}</p>
+            
+            <h5>Vehicle Availability</h5>
+            <table className="table">
+              <thead><tr><th>Vehicle</th><th>Available</th></tr></thead>
+              <tbody>
+                {vehicles.map((v,i)=><tr key={i}><td>{v.name}</td><td>{v.available}</td></tr>)}
+              </tbody>
+            </table>
+
+            <h5>Booking History</h5>
+            <table className="table">
+              <thead><tr><th>Vehicle</th><th>Fare</th><th>Time</th></tr></thead>
+              <tbody>
+                {history.map((h,i)=><tr key={i}><td>{h.vehicle}</td><td>₦{h.fare}</td><td>{h.time}</td></tr>)}
+              </tbody>
+            </table>
+
+            <h5>Cancelled Bookings</h5>
+            <table className="table">
+              <thead><tr><th>Vehicle</th><th>Time</th></tr></thead>
+              <tbody>
+                {cancelled.map((c,i)=><tr key={i}><td>{c.vehicle}</td><td>{c.time}</td></tr>)}
+              </tbody>
+            </table>
+
+            <h5>Drivers Overview</h5>
+            <div style={{display:"flex",flexWrap:"wrap",gap:"10px"}}>
+              {drivers.map((d,i)=>(
+                <div key={i} className="card" style={{width:"calc(50% - 10px)"}}>
+                  <img src="images/driver.jpg" style={{height:"100px",objectFit:"cover"}}/>
+                  <h6>{d.name}</h6>
+                  <p>Vehicle: {d.vehicle}</p>
+                  <p>Rating: ⭐ {d.rating}</p>
+                  <p>Status: {d.available ? "Available" : "Busy"}</p>
+                </div>
+              ))}
+            </div>
+
           </div>
         )}
 
@@ -167,37 +192,31 @@ function App(){
                 <img src={v.image}/>
                 <h4>{v.name}</h4>
                 <p>₦{v.price}/km</p>
-                <button className="primary" onClick={()=>startBooking(v)}>Book Ride</button>
+                <p>Available: {v.available}</p>
+                <button className="primary" disabled={v.available===0} onClick={()=>startBooking(v)}>
+                  {v.available===0?"Not Available":"Book Ride"}
+                </button>
               </div>
             ))}
-
-            {history.length>0 && (
-              <div className="card history">
-                <h4>Booking History</h4>
-                {history.map((h,i)=>(
-                  <div key={i}>{h.vehicle} - ₦{h.fare}</div>
-                ))}
-              </div>
-            )}
           </>
         )}
 
         {/* BOOKING PAGE */}
-        {page==="booking" && (
+        {page==="booking" && selected && (
           <>
             <h3>{selected.name}</h3>
             <input type="number" placeholder="Enter distance (km)" id="distance"/>
             <br/>
             <button className="primary" onClick={()=>{
-              const d = document.getElementById("distance").value;
+              const d=document.getElementById("distance").value;
               calculateFare(d);
             }}>Confirm & Pay</button>
-            <button className="cancel" onClick={cancelBooking}>Cancel Booking</button>
+            <button className="cancel" onClick={()=>cancelBooking()}>Cancel Booking</button>
           </>
         )}
 
         {/* TRACKING PAGE */}
-        {page==="tracking" && (
+        {page==="tracking" && selected && (
           <>
             <h3>Driver On The Way 🚗</h3>
             <div className="map-ui">
@@ -206,10 +225,13 @@ function App(){
 
             <div className="card">
               <img src="images/driver.jpg"/>
-              <h4>Driver: Tunde A.</h4>
+              <h4>Driver: {drivers.find(d=>d.vehicle===selected.name)?.name || "TBD"}</h4>
               <p>Vehicle: {selected.name}</p>
-              <p>Rating: ⭐ 4.8</p>
+              <p>Rating: ⭐ {drivers.find(d=>d.vehicle===selected.name)?.rating || "N/A"}</p>
             </div>
+
+            {/* CANCEL DURING TRACKING */}
+            <button className="cancel" onClick={()=>cancelBooking(true)}>Cancel Ride</button>
 
             {progress>=100 && <button className="success" onClick={()=>setPage("home")}>Ride Completed ✅ Back Home</button>}
           </>
