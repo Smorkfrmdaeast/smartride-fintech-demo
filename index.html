@@ -2,107 +2,76 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>SmartRide NG – Fintech Demo</title>
+<title>SmartRide NG – Professional Fintech Demo</title>
 
 <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-<meta name="description" content="SmartRide NG is a mobile-first fintech transportation booking platform built with React. Users can book Keke, Okada, Cabs, and Buses, simulate wallet payments in Naira (₦), track drivers in real-time, and view booking history. Designed as an investor-ready MVP showcasing modern UI, fintech flow, and scalable architecture.">
+<meta name="description" content="SmartRide NG is a mobile-first fintech ride-booking demo built with React. Book Keke, Okada, Cab, Bus, pay via wallet simulation, cancel or change rides, track drivers, and view booking history. Investor-ready demo with professional UI and scalable architecture.">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
+/* GENERAL */
 body{
   margin:0;
-  font-family:Arial, sans-serif;
+  font-family: 'Segoe UI', Arial, sans-serif;
   transition:0.3s;
 }
-.dark{
-  background:#0f172a;
-  color:white;
-}
-.light{
-  background:#f4f6f9;
-  color:#111;
-}
-.container{
-  max-width:420px;
-  margin:auto;
-  padding:15px;
-}
-.header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-button{
-  padding:10px;
-  border:none;
-  border-radius:8px;
-  cursor:pointer;
-  margin-top:5px;
-}
-.primary{
-  background:#00e0ff;
-  color:#111;
-  font-weight:bold;
-}
+.dark{ background:#121212; color:white; }
+.light{ background:#F8F9FA; color:#111; }
+
+.container{ max-width:420px; margin:auto; padding:15px; }
+
+/* HEADER */
+.header{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; }
+button{ padding:8px 12px; border:none; border-radius:8px; cursor:pointer; margin:5px 2px; font-weight:600; }
+
+/* BUTTONS */
+.primary{ background:#0D6EFD; color:white; }
+.success{ background:#198754; color:white; }
+.cancel{ background:#DC3545; color:white; }
+.admin{ background:#6C757D; color:white; }
+
+/* CARDS */
 .card{
   background:white;
-  padding:10px;
+  padding:12px;
   margin-top:10px;
   border-radius:12px;
-  box-shadow:0 4px 10px rgba(0,0,0,0.1);
+  box-shadow:0 4px 12px rgba(0,0,0,0.08);
   transition:0.3s;
 }
-.dark .card{
-  background:#1e293b;
-}
-.card img{
-  width:100%;
-  height:130px;
-  object-fit:cover;
-  border-radius:10px;
-}
-.card:hover{
-  transform:scale(1.02);
-  box-shadow:0 0 20px rgba(0,224,255,0.4);
-}
+.dark .card{ background:#1E1E1E; box-shadow:0 4px 12px rgba(0,0,0,0.5); }
+.card img{ width:100%; height:130px; object-fit:cover; border-radius:10px; }
+.card:hover{ transform:scale(1.02); box-shadow:0 0 18px rgba(13,110,253,0.4); }
+
+/* MAP UI */
 .map-ui{
   height:150px;
-  background:linear-gradient(45deg,#00e0ff,#007cf0);
+  background:#0D6EFD;
   border-radius:12px;
   margin-top:10px;
   position:relative;
 }
 .driver-dot{
-  width:15px;
-  height:15px;
-  background:red;
+  width:15px; height:15px;
+  background:#DC3545;
   border-radius:50%;
   position:absolute;
   top:60px;
   left:20px;
   animation:move 4s infinite linear;
 }
-@keyframes move{
-  from{left:20px;}
-  to{left:300px;}
-}
-.wallet{
-  font-size:18px;
-  font-weight:bold;
-}
-.history{
-  font-size:14px;
-}
-.admin{
-  background:#111827;
-  color:white;
-  padding:10px;
-  border-radius:12px;
-  margin-top:15px;
-}
+@keyframes move{ from{left:20px;} to{left:300px;} }
+
+/* WALLET & HISTORY */
+.wallet{ font-size:18px; font-weight:bold; }
+.history{ font-size:14px; margin-top:10px; }
+
+/* INPUTS */
+input[type=number]{ padding:10px; margin-top:10px; border-radius:8px; border:1px solid #CED4DA; width:80%; max-width:300px; }
+
 </style>
 </head>
 
@@ -132,9 +101,14 @@ function App(){
     document.body.className = theme;
   }, [theme]);
 
-  const bookRide = (vehicle)=>{
+  const startBooking = (vehicle)=>{
     setSelected(vehicle);
     setPage("booking");
+  };
+
+  const cancelBooking = ()=>{
+    setSelected(null);
+    setPage("home");
   };
 
   const calculateFare = (distance)=>{
@@ -160,6 +134,7 @@ function App(){
     <div className={theme}>
       <div className="container">
 
+        {/* HEADER */}
         <div className="header">
           <h2>SmartRide NG</h2>
           <div>
@@ -173,8 +148,9 @@ function App(){
           </div>
         </div>
 
+        {/* ADMIN DASHBOARD */}
         {showAdmin && (
-          <div className="admin">
+          <div className="card admin">
             <h4>Admin Dashboard</h4>
             <p>Total Rides: {history.length}</p>
             <p>Total Revenue: ₦{history.reduce((a,b)=>a+b.fare,0)}</p>
@@ -182,6 +158,7 @@ function App(){
           </div>
         )}
 
+        {/* HOME PAGE */}
         {page==="home" && (
           <>
             <h3>Select Ride</h3>
@@ -190,7 +167,7 @@ function App(){
                 <img src={v.image}/>
                 <h4>{v.name}</h4>
                 <p>₦{v.price}/km</p>
-                <button className="primary" onClick={()=>bookRide(v)}>Book Ride</button>
+                <button className="primary" onClick={()=>startBooking(v)}>Book Ride</button>
               </div>
             ))}
 
@@ -205,30 +182,36 @@ function App(){
           </>
         )}
 
+        {/* BOOKING PAGE */}
         {page==="booking" && (
           <>
             <h3>{selected.name}</h3>
             <input type="number" placeholder="Enter distance (km)" id="distance"/>
+            <br/>
             <button className="primary" onClick={()=>{
               const d = document.getElementById("distance").value;
               calculateFare(d);
             }}>Confirm & Pay</button>
+            <button className="cancel" onClick={cancelBooking}>Cancel Booking</button>
           </>
         )}
 
+        {/* TRACKING PAGE */}
         {page==="tracking" && (
           <>
             <h3>Driver On The Way 🚗</h3>
             <div className="map-ui">
               <div className="driver-dot"></div>
             </div>
+
             <div className="card">
               <img src="images/driver.jpg"/>
               <h4>Driver: Tunde A.</h4>
               <p>Vehicle: {selected.name}</p>
               <p>Rating: ⭐ 4.8</p>
             </div>
-            {progress>=100 && <button className="primary" onClick={()=>setPage("home")}>Ride Completed ✅ Back Home</button>}
+
+            {progress>=100 && <button className="success" onClick={()=>setPage("home")}>Ride Completed ✅ Back Home</button>}
           </>
         )}
 
